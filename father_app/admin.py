@@ -1,53 +1,37 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import PoetryBook, Poem, MusicAlbum, Track
 from django.urls import reverse
-from django import forms
-
-class PoemInline(admin.TabularInline):
-    model = Poem
-    extra = 1
-    fields = ['order', 'title', 'content']
-
-    def get_queryset(self, request):
-        # Фикс для правильного отображения в админке
-        qs = super().get_queryset(request)
-        return qs.select_related('book')
-
+from .models import PoetryBook, MusicAlbum, Track
 
 @admin.register(PoetryBook)
 class PoetryBookAdmin(admin.ModelAdmin):
-    list_display = ['title', 'author', 'year', 'poems_link']
-    inlines = [PoemInline]
+    list_display = ['title', 'author', 'get_year', 'page_count', 'pdf_link']
+    readonly_fields = ['page_count', 'pdf_preview']
+    fields = ['title', 'author', 'year', 'cover', 'pdf_file', 'page_count', 'pdf_preview']
+    list_filter = ['author']  # Или другие существующие поля
 
-    def poems_link(self, obj):
-        url = reverse('admin:father_app_poem_changelist') + f'?book__id__exact={obj.id}'
-        return format_html('<a href="{}">Стихи ({})</a>', url, obj.poems.count())
+    def get_year(self, obj):
+        return obj.year
 
-    poems_link.short_description = "Стихотворения"
+    get_year.short_description = 'Год'
+    get_year.admin_order_field = 'year'  # Для сортировки
 
-class PoemForm(forms.ModelForm):
-    class Meta:
-        model = Poem
-        widgets = {
-            'content': forms.Textarea(attrs={'rows': 20, 'cols': 60, 'style': 'font-family: monospace;'}),
-        }
-        fields = '__all__'
+    def pdf_link(self, obj):
+        if obj.pdf_file:
+            return format_html('<a href="{}" target="_blank">Открыть PDF</a>', obj.pdf_file.url)
+        return "-"
 
-@admin.register(Poem)
-class PoemAdmin(admin.ModelAdmin):
-    form = PoemForm
-    list_display = ['title', 'book_link', 'order']
-    list_filter = ['book']
-    search_fields = ['title', 'content']
+    pdf_link.short_description = "PDF"
 
-    def book_link(self, obj):
-        url = reverse('admin:father_app_poetrybook_change', args=[obj.book.id])
-        return format_html('<a href="{}">{}</a>', url, obj.book.title)
+    def pdf_preview(self, obj):
+        if obj.pdf_file:
+            return format_html(
+                '<iframe src="{}#toolbar=0&view=FitH" style="width:100%; height:500px;"></iframe>',
+                obj.pdf_file.url
+            )
+        return "PDF не загружен"
 
-    book_link.short_description = "Книга"
-    book_link.admin_order_field = 'book'
-
+    pdf_preview.short_description = "Предпросмотр PDF"
 
 class TrackInline(admin.TabularInline):
     model = Track
@@ -60,35 +44,39 @@ class TrackInline(admin.TabularInline):
             '<audio controls src="{}" style="width: 250px;"></audio>',
             obj.audio_file.url
         ) if obj.audio_file else ''
-
     audio_player.short_description = "Прослушать"
-
 
 @admin.register(MusicAlbum)
 class MusicAlbumAdmin(admin.ModelAdmin):
     list_display = ['title', 'artist', 'year', 'month', 'tracks_link']
-    list_filter = ['year', 'month', 'artist']  # можно фильтровать по месяцу
+    list_filter = ['year', 'month', 'artist']
     search_fields = ['title', 'artist']
+    inlines = [TrackInline]
 
     def tracks_link(self, obj):
+        count = obj.tracks.count()
         url = reverse('admin:father_app_track_changelist') + f'?album__id__exact={obj.id}'
-        return format_html('<a href="{}">Треки ({})</a>', url, obj.tracks.count())
-
+        return format_html('<a href="{}">Треки ({})</a>', url, count)
     tracks_link.short_description = "Треки"
-
 
 @admin.register(Track)
 class TrackAdmin(admin.ModelAdmin):
-    list_display = ['title', 'album_link', 'order']
+    list_display = ['title', 'album_link', 'order', 'duration_formatted']
+    list_filter = ['album']
+    search_fields = ['title']
 
     def album_link(self, obj):
         url = reverse('admin:father_app_musicalbum_change', args=[obj.album.id])
         return format_html('<a href="{}">{}</a>', url, obj.album.title)
-
     album_link.short_description = "Альбом"
+    album_link.admin_order_field = 'album'
 
     def duration_formatted(self, obj):
-        return str(obj.duration).split('.')[0] if obj.duration else '--:--'
-
+        if obj.duration:
+            total_seconds = int(obj.duration.total_seconds())
+            minutes = total_seconds // 60
+            seconds = total_seconds % 60
+            return f"{minutes}:{seconds:02d}"
+        return "--:--"
     duration_formatted.short_description = "Длительность"
     duration_formatted.admin_order_field = 'duration'
