@@ -8,6 +8,7 @@
         width: 49%;
         height: 90vh;
         border: 1px solid #ccc;
+        border-radius: 8px;
     }
 
     .spread-container {
@@ -18,9 +19,30 @@
         margin-bottom: 1rem;
     }
 
+    .pdf-container {
+        position: relative;
+        background: #f5f5f5;
+        border-radius: 8px;
+        padding: 10px;
+    }
+
+    .loading-message {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #666;
+        font-size: 14px;
+    }
+
     @media (max-width: 768px) {
         .pdf-frame {
             width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .spread-container {
+            flex-direction: column;
         }
     }
 </style>
@@ -43,9 +65,20 @@
         </div>
     </div>
 
+    {% if book.pdf_file %}
     <div class="spread-container">
-        <iframe id="left-page" class="pdf-frame"></iframe>
-        <iframe id="right-page" class="pdf-frame"></iframe>
+        <div class="pdf-container">
+            <div class="loading-message" id="left-loading">Загрузка левой страницы...</div>
+            <iframe id="left-page" class="pdf-frame"
+                    sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                    loading="lazy"></iframe>
+        </div>
+        <div class="pdf-container">
+            <div class="loading-message" id="right-loading">Загрузка правой страницы...</div>
+            <iframe id="right-page" class="pdf-frame"
+                    sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                    loading="lazy"></iframe>
+        </div>
     </div>
 
     <div class="navigation d-flex justify-content-between align-items-center">
@@ -54,8 +87,20 @@
         <button id="next-spread" class="btn btn-outline-primary">Вперёд →</button>
     </div>
 
+    <!-- Альтернативный просмотр -->
+    <div class="mt-3">
+        <a href="{{ book.pdf_file.url }}" target="_blank" class="btn btn-secondary">
+            Открыть PDF в новой вкладке
+        </a>
+    </div>
+
     <!-- Скрытые данные -->
     <input type="hidden" id="total-pages" value="{{ book.page_count }}">
     <input type="hidden" id="pdf-url" value="{{ book.pdf_file.url }}">
+    {% else %}
+    <div class="alert alert-warning">
+        PDF файл не найден для этой книги.
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

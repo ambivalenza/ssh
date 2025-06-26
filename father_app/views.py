@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from .models import MusicAlbum, Track, PoetryBook
-
+import os
+from django.http import JsonResponse
+from django.conf import settings
 
 def index(request):
     context = {
@@ -8,6 +10,30 @@ def index(request):
     }
     return render(request, 'father_app/index.html', context)
 
+
+def debug_pdf(request, book_id):
+    """Диагностическая view для проверки PDF файлов"""
+    book = get_object_or_404(PoetryBook, pk=book_id)
+
+    debug_info = {
+        'book_title': book.title,
+        'pdf_file_name': book.pdf_file.name if book.pdf_file else None,
+        'pdf_url': book.pdf_file.url if book.pdf_file else None,
+        'pdf_file_exists': bool(book.pdf_file and os.path.exists(book.pdf_file.path)) if book.pdf_file else False,
+        'media_url': settings.MEDIA_URL,
+        'media_root': settings.MEDIA_ROOT,
+        'page_count': book.page_count,
+    }
+
+    if book.pdf_file:
+        try:
+            debug_info['pdf_file_path'] = book.pdf_file.path
+            debug_info['pdf_file_size'] = os.path.getsize(book.pdf_file.path)
+        except:
+            debug_info['pdf_file_path'] = 'Файл не найден'
+            debug_info['pdf_file_size'] = 0
+
+    return JsonResponse(debug_info, json_dumps_params={'ensure_ascii': False, 'indent': 2})
 
 def book_list(request):
     books = PoetryBook.objects.all().order_by('-year')
