@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const pageIndicator = document.getElementById('page-indicator');
 
     let currentLeftPage = 1;
-    const totalPages = parseInt(document.getElementById('total-pages').value);
+    const totalPages = parseInt(document.getElementById('total-pages').value, 10);
     const pdfUrl = document.getElementById('pdf-url').value;
 
     function updateView() {
