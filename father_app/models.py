@@ -8,6 +8,18 @@ class PoetryBook(models.Model):
     cover = models.ImageField('Обложка', upload_to='books/covers/')
     pdf_file = models.FileField('PDF файл', upload_to='books/pdfs/')
     created_at = models.DateTimeField(auto_now_add=True)
+    pdf_page_count = models.PositiveIntegerField('Количество страниц в PDF', default=0)
+
+    def save(self, *args, **kwargs):
+        if self.pdf_file and not self.pdf_page_count:
+            import PyPDF2
+            try:
+                with open(self.pdf_file.path, 'rb') as f:
+                    reader = PyPDF2.PdfReader(f)
+                    self.pdf_page_count = len(reader.pages)
+            except:
+                pass
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['-year']
@@ -41,13 +53,20 @@ class Poem(models.Model):
 class MusicAlbum(models.Model):
     title = models.CharField('Название', max_length=200)
     artist = models.CharField('Исполнитель', max_length=200, default="Сергей Шорников")
+    month = models.PositiveSmallIntegerField(
+        'Месяц публикации',
+        null=True,
+        blank=True,
+        choices=[(i, i) for i in range(1, 13)],
+        help_text='Месяц выпуска альбома (1-12)'
+    )
     year = models.IntegerField('Год выпуска')
     cover = models.ImageField('Обложка', upload_to='music/covers/')
     description = models.TextField('Описание', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-year']
+        ordering = ['-year', '-month']
         verbose_name = 'Музыкальный альбом'
         verbose_name_plural = 'Музыкальные альбомы'
 

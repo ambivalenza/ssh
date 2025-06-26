@@ -1,0 +1,37 @@
+{% extends 'father_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4 text-center">Книги стихов</h1>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for book in books %}
+        <div class="col">
+            <div class="card h-100 shadow">
+                <img src="{{ book.cover.url }}" class="card-img-top" alt="{{ book.title }}"
+                     data-bs-toggle="modal" data-bs-target="#coverModal{{ book.id }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ book.title }}</h5>
+                    <p class="card-text">{{ book.author }}</p>
+                    <p class="card-text"><small class="text-muted">{{ book.year }}</small></p>
+                    <a href="{% url 'father_app:book_detail' book.id %}" class="btn btn-primary">
+                        Читать
+                    </a>
+                </div>
+            </div>
+
+            <!-- Modal для обложки -->
+            <div class="modal fade" id="coverModal{{ book.id }}" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-body text-center">
+                            <img src="{{ book.cover.url }}" class="img-fluid" alt="{{ book.title }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

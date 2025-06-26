@@ -1,0 +1,21 @@
+/* Основные стили */
+body {
+    padding-top: 20px;
+}
+
+.poem-content {
+    white-space: pre-line;
+    font-family: "Times New Roman", serif;
+    line-height: 1.8;
+}
+
+.audio-player {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.waveform-container {
+    background: #f8f9fa;
+    border-radius: 5px;
+    margin: 10px 0;
+}

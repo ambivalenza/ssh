@@ -1,0 +1,100 @@
+{% extends 'father_app/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'father_app/css/waveform.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 text-center">
+            <img src="{{ album.cover.url }}" class="img-fluid mb-3 rounded"
+                 data-bs-toggle="modal" data-bs-target="#coverModal">
+            <h2>{{ album.title }}</h2>
+            <p class="lead">{{ album.artist }}</p>
+            <p class="text-muted">{{ album.year }}</p>
+
+            {% if album.description %}
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">О альбоме</h5>
+                    <p class="card-text">{{ album.description }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-8">
+            <div class="list-group">
+                {% for track in album.tracks.all %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-1">{{ track.order }}. {{ track.title }}</h5>
+                        <span class="badge bg-primary rounded-pill">{{ track.duration|default:"--:--" }}</span>
+                    </div>
+                    <div class="waveform mt-2" data-audio-url="{{ track.audio_file.url }}"></div>
+                    <div class="audio-controls mt-2">
+                        <button class="btn btn-sm btn-outline-primary play-btn">
+                            <i class="bi bi-play"></i>
+                        </button>
+                        <input type="range" class="form-range volume-slider" min="0" max="1" step="0.1" value="1">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal для обложки -->
+<div class="modal fade" id="coverModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <img src="{{ album.cover.url }}" class="img-fluid" alt="{{ album.title }}">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'father_app/js/wavesurfer.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.waveform').forEach(waveform => {
+        const audioUrl = waveform.dataset.audioUrl;
+        const wavesurfer = WaveSurfer.create({
+            container: waveform,
+            waveColor: '#ddd',
+            progressColor: '#0d6efd',
+            cursorColor: '#0d6efd',
+            barWidth: 2,
+            height: 80
+        });
+
+        wavesurfer.load(audioUrl);
+
+        const playBtn = waveform.nextElementSibling.querySelector('.play-btn');
+        const volumeSlider = waveform.nextElementSibling.querySelector('.volume-slider');
+
+        playBtn.addEventListener('click', () => {
+            wavesurfer.playPause();
+        });
+
+        volumeSlider.addEventListener('input', (e) => {
+            wavesurfer.setVolume(e.target.value);
+        });
+
+        wavesurfer.on('play', () => {
+            playBtn.innerHTML = '<i class="bi bi-pause"></i>';
+        });
+
+        wavesurfer.on('pause', () => {
+            playBtn.innerHTML = '<i class="bi bi-play"></i>';
+        });
+    });
+});
+</script>
+{% endblock %}

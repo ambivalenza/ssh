@@ -1,0 +1,42 @@
+{% extends 'father_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 text-center">
+            <img src="{{ book.cover.url }}" class="img-fluid mb-3 rounded"
+                 data-bs-toggle="modal" data-bs-target="#coverModal">
+            <h2>{{ book.title }}</h2>
+            <p class="lead">{{ book.author }}</p>
+            <p class="text-muted">{{ book.year }}</p>
+
+            <a href="{{ book.pdf_file.url }}" class="btn btn-outline-primary mt-3" download>
+                <i class="bi bi-file-earmark-pdf"></i> Скачать PDF
+            </a>
+        </div>
+
+        <div class="col-md-8">
+            <div class="list-group">
+                {% for poem in book.poems.all %}
+                <a href="{% url 'father_app:poem_detail' book.id poem.id %}"
+                   class="list-group-item list-group-item-action">
+                    {{ poem.order }}. {{ poem.title }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal для обложки -->
+<div class="modal fade" id="coverModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <img src="{{ book.cover.url }}" class="img-fluid" alt="{{ book.title }}">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

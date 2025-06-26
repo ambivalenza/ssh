@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from .models import PoetryBook, Poem, MusicAlbum, Track
 from django.urls import reverse
+from django import forms
 
 class PoemInline(admin.TabularInline):
     model = Poem
@@ -25,9 +26,17 @@ class PoetryBookAdmin(admin.ModelAdmin):
 
     poems_link.short_description = "Стихотворения"
 
+class PoemForm(forms.ModelForm):
+    class Meta:
+        model = Poem
+        widgets = {
+            'content': forms.Textarea(attrs={'rows': 20, 'cols': 60, 'style': 'font-family: monospace;'}),
+        }
+        fields = '__all__'
 
 @admin.register(Poem)
 class PoemAdmin(admin.ModelAdmin):
+    form = PoemForm
     list_display = ['title', 'book_link', 'order']
     list_filter = ['book']
     search_fields = ['title', 'content']
@@ -57,7 +66,9 @@ class TrackInline(admin.TabularInline):
 
 @admin.register(MusicAlbum)
 class MusicAlbumAdmin(admin.ModelAdmin):
-    list_display = ['title', 'artist', 'year', 'tracks_link']
+    list_display = ['title', 'artist', 'year', 'month', 'tracks_link']
+    list_filter = ['year', 'month', 'artist']  # можно фильтровать по месяцу
+    search_fields = ['title', 'artist']
 
     def tracks_link(self, obj):
         url = reverse('admin:father_app_track_changelist') + f'?album__id__exact={obj.id}'

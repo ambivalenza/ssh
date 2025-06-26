@@ -1,9 +1,13 @@
 from django.shortcuts import render, get_object_or_404
 from .models import PoetryBook, Poem, MusicAlbum, Track
+from django.views.decorators.cache import cache_page
 
 
 def index(request):
-    return render(request, 'father_app/index.html')
+    context = {
+        'is_home': True
+    }
+    return render(request, 'father_app/index.html', context)
 
 
 def track_detail(request, album_id, track_id):
@@ -23,7 +27,7 @@ def book_list(request):
     books = PoetryBook.objects.all().order_by('-year')
     return render(request, 'father_app/poetry/book_list.html', {'books': books})
 
-
+@cache_page(60 * 15)  # Кеш на 15 минут
 def book_detail(request, book_id):
     book = get_object_or_404(PoetryBook, pk=book_id)
     return render(request, 'father_app/poetry/book_detail.html', {'book': book})
@@ -44,7 +48,7 @@ def poem_detail(request, book_id, poem_id):
 
 # Музыка
 def album_list(request):
-    albums = MusicAlbum.objects.all().order_by('-year')
+    albums = MusicAlbum.objects.all().order_by('-year', '-month')
     return render(request, 'father_app/music/album_list.html', {'albums': albums})
 
 
