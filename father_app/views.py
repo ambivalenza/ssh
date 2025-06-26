@@ -13,6 +13,10 @@ def book_list(request):
     books = PoetryBook.objects.all().order_by('-year')
     return render(request, 'father_app/poetry/book_list.html', {'books': books})
 
+def book_detail(request, book_id):
+    book = get_object_or_404(PoetryBook, pk=book_id)
+    return render(request, 'father_app/poetry/book_detail.html', {'book': book})
+
 def book_view(request, book_id):
     book = get_object_or_404(PoetryBook, pk=book_id)
     page = request.GET.get('page', 1)

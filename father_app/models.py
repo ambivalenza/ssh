@@ -7,8 +7,8 @@ class PoetryBook(models.Model):
     author = models.CharField('Автор', max_length=200, default="Сергей Шорников")
     year = models.IntegerField('Год издания')  # Это поле обязательно
     cover = models.ImageField('Обложка', upload_to='books/covers/')
-    pdf_file = models.FileField('PDF файл', upload_to='books/pdfs/')
-    page_count = models.PositiveIntegerField('Количество страниц', default=0)
+    pdf_file = models.FileField(upload_to='books/pdfs/')
+    page_count = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name = 'Книга стихов'

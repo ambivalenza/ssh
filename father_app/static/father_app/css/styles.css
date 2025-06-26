@@ -1,21 +1,64 @@
-/* Основные стили */
-body {
-    padding-top: 20px;
+/* static/father_app/style.css */
+
+/* Общие стили для PDF просмотрщика */
+.pdf-viewer-container {
+    padding: 20px;
+    height: calc(100vh - 60px);
 }
 
-.poem-content {
-    white-space: pre-line;
-    font-family: "Times New Roman", serif;
-    line-height: 1.8;
+.pdf-spread-view {
+    display: flex;
+    height: 90%;
+    gap: 10px;
 }
 
-.audio-player {
+.pdf-page {
+    flex: 1;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+/* Стили для обложки */
+.full-height-cover {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    padding-right: 0 !important;
+}
+
+.full-height-cover img {
+    object-fit: cover;
+    min-height: 100vh;
     width: 100%;
-    margin-top: 10px;
 }
 
-.waveform-container {
-    background: #f8f9fa;
-    border-radius: 5px;
-    margin: 10px 0;
+/* Навигация */
+.pdf-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.page-indicator {
+    align-self: center;
+    font-weight: bold;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+    .pdf-spread-view {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .pdf-page {
+        height: 50vh;
+    }
+
+    .full-height-cover {
+        height: auto;
+        position: relative;
+    }
 }

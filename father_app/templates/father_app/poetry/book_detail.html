@@ -1,0 +1,110 @@
+{% extends 'father_app/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'father_app/css/book.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация переменных
+    let currentSpread = 1;
+    const totalPages = {{ book.page_count }};
+    const pdfUrl = "{{ book.pdf_file.url }}";
+    const leftFrame = document.getElementById('left-page');
+    const rightFrame = document.getElementById('right-page');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const pageIndicator = document.getElementById('page-indicator');
+
+    // Функция обновления просмотра
+    function updateView() {
+        const leftPage = currentSpread;
+        const rightPage = Math.min(currentSpread + 1, totalPages);
+
+        leftFrame.src = `${pdfUrl}#page=${leftPage}&view=FitH`;
+        rightFrame.src = `${pdfUrl}#page=${rightPage}&view=FitH`;
+
+        pageIndicator.textContent = `Страницы ${leftPage}-${rightPage} из ${totalPages}`;
+
+        prevBtn.disabled = currentSpread <= 1;
+        nextBtn.disabled = currentSpread + 1 >= totalPages;
+    }
+
+    // Обработчики кнопок
+    prevBtn.addEventListener('click', function() {
+        if (currentSpread > 1) {
+            currentSpread = Math.max(1, currentSpread - 2);
+            updateView();
+        }
+    });
+
+    nextBtn.addEventListener('click', function() {
+        if (currentSpread + 1 < totalPages) {
+            currentSpread += 2;
+            updateView();
+        }
+    });
+
+    // Инициализация
+    updateView();
+
+    // Модальное окно для обложки
+    const coverModal = new bootstrap.Modal(document.getElementById('coverModal'));
+    document.querySelector('.cover-image').addEventListener('click', function() {
+        coverModal.show();
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="book-container">
+    <!-- Секция с обложкой -->
+    <div class="cover-section">
+        {% if book.cover %}
+        <img src="{{ book.cover.url }}" alt="{{ book.title }}" class="cover-image">
+        <div class="cover-info">
+            <h2>{{ book.title }}</h2>
+            <p class="text-muted">{{ book.author }}</p>
+            <p>{{ book.year }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Секция с PDF -->
+    <div class="pdf-section">
+        <div class="pdf-viewer">
+            <iframe id="left-page" class="pdf-page"></iframe>
+            <iframe id="right-page" class="pdf-page"></iframe>
+        </div>
+
+        <div class="navigation">
+            <button id="prev-btn" class="btn btn-outline-primary">
+                ← Предыдущий разворот
+            </button>
+            <span id="page-indicator" class="align-self-center"></span>
+            <button id="next-btn" class="btn btn-outline-primary">
+                Следующий разворот →
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для обложки -->
+<div class="modal fade" id="coverModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                {% if book.cover %}
+                <img src="{{ book.cover.url }}" class="modal-cover" alt="{{ book.title }}">
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

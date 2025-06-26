@@ -1,0 +1,86 @@
+/* Основные стили */
+.book-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Стили для обложки */
+.cover-section {
+    width: 35%;
+    padding: 2rem;
+    background: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #e0e0e0;
+}
+
+.cover-image {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-bottom: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.cover-image:hover {
+    transform: scale(1.02);
+}
+
+.cover-info {
+    text-align: center;
+}
+
+/* Стили для PDF просмотра */
+.pdf-section {
+    width: 65%;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+.pdf-viewer {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.pdf-page {
+    flex: 1;
+    height: 80vh;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
+/* Модальное окно для обложки */
+.modal-cover {
+    max-width: 90vw;
+    max-height: 90vh;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 992px) {
+    .book-container {
+        flex-direction: column;
+    }
+
+    .cover-section, .pdf-section {
+        width: 100%;
+    }
+
+    .pdf-viewer {
+        flex-direction: column;
+    }
+
+    .pdf-page {
+        height: 50vh;
+    }
+}
